@@ -19,5 +19,5 @@ if __name__ == '__main__':
 		download_manga = False
 	lib = PixivHackLib()
 	lib.session_id = PHPSESSID
-	lib.config('kancolle', int(min_ratings), int(max_pics), download_manga)
+	lib.config(key_word, int(min_ratings), int(max_pics), download_manga)
 	lib.crawl()
