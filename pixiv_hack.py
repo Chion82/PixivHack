@@ -3,11 +3,11 @@ from lib.cls_crawl import PixivHackLib
 if __name__ == '__main__':
 	print('Enter PHPSESSID:')
 	PHPSESSID = raw_input()
-	print('Enter key word:')
+	print('Enter keyword:')
 	key_word = raw_input()
 	print('Enter minimum ratings:')
 	min_ratings = raw_input()
-	print('Enter maximum illustrations to download:')
+	print('Enter maximum number of illustrations to download:')
 	max_pics = raw_input()
 	print('Download manga? (Y/n)')
 	download_manga_str = raw_input()

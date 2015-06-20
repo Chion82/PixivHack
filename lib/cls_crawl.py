@@ -1,10 +1,13 @@
 # coding=utf-8
 
+#Author: Chion82<sdspeedonion@gmail.com>
+
 import requests
 import urllib
 import re
 import sys, os
 import HTMLParser
+import json
 from urlparse import urlparse, parse_qs
 
 reload(sys)
@@ -21,6 +24,7 @@ class PixivHackLib(object):
 		self.__max_pics = 10
 		self.__pic_downloaded_count = 0
 		self.__download_manga = True
+		self.__author_ratings = []
 
 	@property
 	def session_id(self):
@@ -38,6 +42,7 @@ class PixivHackLib(object):
 
 	def crawl(self):
 		self.__pic_downloaded_count = 0
+		self.__author_ratings = []
 		page = 1
 		while self.__pic_downloaded_count < self.__max_pics :
 			search_result = self.__get_search_result(page)
@@ -50,7 +55,8 @@ class PixivHackLib(object):
 				self.__enter_illustration_page(link)
 			page = page + 1
 			print('************************Moving to next page************************')
-		print('All Done!')
+		print('All Done! Saving author info...')
+		self.__save_author_ratings()
 
 	def __get_search_result(self, page):
 		try:
@@ -85,6 +91,7 @@ class PixivHackLib(object):
 		if (int(ratings) < self.__min_ratings):
 			print('Ratings < ' + str(self.__min_ratings) + ' , Skipping...')
 			return
+		self.__increment_author_ratings(pixiv_author_id, int(ratings), pixiv_id)
 		re_manga_result = re.findall(r'<a href="(member_illust\.php\?mode=manga&amp;illust_id=.*?)"', page_result.text)
 		re_image_result = re.findall(r'data-src="(.*?/img-original/.*?)"', page_result.text)
 		if (len(re_manga_result) > 0):
@@ -168,6 +175,21 @@ class PixivHackLib(object):
 			f.close()
 		print('Download completed.')
 
+	def __increment_author_ratings(self, author_id, increment, pixiv_id):
+		for author in self.__author_ratings:
+			if (author['author_id'] == author_id):
+				if (pixiv_id in author['illust_id']):
+					return
+				author['total_ratings'] = author['total_ratings'] + increment
+				author['illust_id'].append(pixiv_id)
+				return
+		self.__author_ratings.append({'author_id':author_id, 'total_ratings':increment, 'illust_id':[pixiv_id]})
+
+	def __save_author_ratings(self):
+		self.__author_ratings = sorted(self.__author_ratings, key=lambda author:author['total_ratings'], reverse=True)
+		f = open('author_info.json','w+')
+		f.write(json.dumps(self.__author_ratings))
+		f.close()
 
 	def __html_decode(self, string):
 		h = HTMLParser.HTMLParser()
