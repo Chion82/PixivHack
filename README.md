@@ -9,7 +9,7 @@ Pixiv Hack is a tool to automatically crawl illustrations filtered by ratings on
 ```
 $ python pixiv_hack.py
 ```
-* Follow the prompt and enter the PHPSESSID you just copied, the keyword to search with, the minimum ratings of illustrations to filtered with, the maximum number of illustrations to download and whether to download the manga.  
+* Follow the prompt and enter the PHPSESSID you just copied, the keyword to search with, the minimum ratings of illustrations to filtered with, the maximum number of illustrations to download and whether to download manga.  
 * Sit back and relax! The script will do the rest.  
 * After all work is done, you can check out ```author_info.json``` to view the ratings and the illustration ids of each Pixiv author that is crawled.  
 * All downloadable illustrations are saved in the ```images``` directory.
