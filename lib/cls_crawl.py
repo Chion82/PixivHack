@@ -45,31 +45,56 @@ class PixivHackLib(object):
 		self.__author_ratings = []
 		page = 1
 		while self.__pic_downloaded_count < self.__max_pics :
-			search_result = self.__get_search_result(page)
+			search_result = self.__get_search_result(page, None)
 			if (len(search_result)==0 or page>1000):
 				print('No more result found. ')
 				break
 			for link in search_result:
 				if (self.__pic_downloaded_count >= self.__max_pics):
 					break
-				self.__enter_illustration_page(link)
+				self.__enter_illustration_page(link, 'images')
 			page = page + 1
 			print('************************Moving to next page************************')
 		print('All Done! Saving author info...')
 		self.__save_author_ratings()
 
-	def __get_search_result(self, page):
+	def crawl_by_author(self, author_list, max_pics_per_author):
+		for author_id in author_list:
+			print('***********************Crawling by author*************************')
+			print('author Pixiv ID : ' + author_id)
+			self.__pic_downloaded_count = 0
+			page = 1
+			if not os.path.exists('images/' + author_id):
+				os.makedirs('images/' + author_id)
+			while self.__pic_downloaded_count < max_pics_per_author:
+				search_result = self.__get_search_result(page, author_id)
+				if (len(search_result) == 0):
+					print('No more result found.')
+					break
+				for link in search_result:
+					if (self.__pic_downloaded_count >= max_pics_per_author):
+						break
+					self.__enter_illustration_page(link, 'images/' + author_id)
+				page = page + 1
+				print('************************Moving to next page***************************')
+			print('***********************Moving to next author**************************')
+		print('All Done!')
+
+	def __get_search_result(self, page, author_id):
 		try:
-			search_result = self.__session.get('http://www.pixiv.net/search.php?word=' + urllib.quote(self.__keyword) + '&p=' + str(page), cookies={'PHPSESSID': self.__session_id})
+			if (author_id == None):
+				search_result = self.__session.get('http://www.pixiv.net/search.php?word=' + urllib.quote(self.__keyword) + '&p=' + str(page), cookies={'PHPSESSID': self.__session_id})
+			else:
+				search_result = self.__session.get('http://www.pixiv.net/member_illust.php?id=' + author_id + '&type=all&p=' + str(page), cookies={'PHPSESSID': self.__session_id})
 		except Exception:
 			print('Connection failure. Retrying...')
-			self.__get_search_result(page)
+			self.__get_search_result(page, author_id)
 			return
 		
 		result_list = re.findall(r'<a href="(/member_illust\.php\?mode=.*?&amp;illust_id=.*?)">', search_result.text)
 		return ['http://www.pixiv.net'+self.__html_decode(link) for link in result_list if (not '"' in link)]
 
-	def __enter_illustration_page(self, url):
+	def __enter_illustration_page(self, url, directory):
 		print('********************Entering illustration page*********************')
 		print('Entering ' + url)
 
@@ -77,7 +102,7 @@ class PixivHackLib(object):
 			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id})
 		except Exception:
 			print('Connection failure. Retrying...')
-			self.__enter_illustration_page(url)
+			self.__enter_illustration_page(url, directory)
 			return
 		
 		re_result_ratings = re.findall(r'<dd class="rated-count">(.*?)</dd>', page_result.text)
@@ -94,85 +119,72 @@ class PixivHackLib(object):
 		self.__increment_author_ratings(pixiv_author_id, int(ratings), pixiv_id)
 		re_manga_result = re.findall(r'<a href="(member_illust\.php\?mode=manga&amp;illust_id=.*?)"', page_result.text)
 		re_image_result = re.findall(r'data-src="(.*?/img-original/.*?)"', page_result.text)
+		re_big_image_result = re.findall(r'<a href="(member_illust\.php\?mode=big&amp;illust_id=.*?)"', page_result.text)
 		if (len(re_manga_result) > 0):
 			if (self.__download_manga == False):
 				print('Illustration is manga. Skipping...')
 				return
 			print('Illustration is manga. Entering manga page.')
-			self.__enter_manga_page('http://www.pixiv.net/' + self.__html_decode(re_manga_result[0]), pixiv_id)
+			self.__enter_manga_page('http://www.pixiv.net/' + self.__html_decode(re_manga_result[0]), pixiv_id, url, directory)
 			self.__pic_downloaded_count = self.__pic_downloaded_count + 1
 		elif (len(re_image_result) > 0):
 			print('Illustration is image. Downloading image...')
-
-			try:
-				download_result = self.__session.get(self.__html_decode(re_image_result[0]), cookies={'PHPSESSID': self.__session_id}, headers={'Referer':url})
-			except Exception:
-				print('Connection failure. Retrying...')
-				self.__enter_illustration_page(url)
-				return
-			
 			self.__pic_downloaded_count = self.__pic_downloaded_count + 1
-			if (download_result.status_code != 200):
-				print('Download Error')
-				print(download_result.text)
-			url_parsed_array = re_image_result[0].split('/')
-			file_name = url_parsed_array[len(url_parsed_array)-1]
-			with open('images/' + file_name, 'wb+') as f:
-				for chunk in download_result.iter_content():
-					f.write(chunk)
-				f.close()
+			self.__download_image(self.__html_decode(re_image_result[0]), url, directory)
 			print('Download completed.')
+		elif (len(re_big_image_result) > 0):
+			print('Illustration mode is big-image. Entering big-image page.')
+			self.__enter_big_image_page('http://www.pixiv.net/' + self.__html_decode(re_big_image_result[0]), url, directory)
+			self.__pic_downloaded_count = self.__pic_downloaded_count + 1
 		else:
 			print('Illustration mode not supported. Skipping...')
 
-
-	def __enter_manga_page(self, url, pixiv_id):
-		print('********************Entering manga page**************************')
+	def __enter_big_image_page(self, url, referer, directory):
+		print('********************Entering big-image page************************')
 		print('Entering ' + url)
-		if not os.path.exists('images/' + pixiv_id):
-			os.makedirs('images/' + pixiv_id)
-
 		try:
-			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id})
+			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id}, headers={'Referer':referer})
 		except Exception:
 			print('Connection failure. Retrying...')
-			self.__enter_manga_page(url, pixiv_id)
+			self.__enter_big_image_page(url, referer, directory)
+			return
+
+		re_big_image_url = re.findall(r'<img src="(.*?)"', page_result.text)
+		print('Downloading big-image.')
+		self.__download_image(self.__html_decode(re_big_image_url[0]), url, directory)
+		print('Download completed.')
+
+	def __enter_manga_page(self, url, pixiv_id, referer,directory):
+		print('********************Entering manga page**************************')
+		print('Entering ' + url)
+		if not os.path.exists(directory + '/' + pixiv_id):
+			os.makedirs(directory + '/' + pixiv_id)
+
+		try:
+			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id}, headers={'Referer':referer})
+		except Exception:
+			print('Connection failure. Retrying...')
+			self.__enter_manga_page(url, pixiv_id, referer,directory)
 			return
 
 		re_manga_page_result = re.findall(r'<a href="(/member_illust\.php\?mode=manga_big.*?)"', page_result.text)
 		for link in re_manga_page_result:
-			self.__enter_manga_big_page('http://www.pixiv.net' + self.__html_decode(link), pixiv_id)
+			self.__enter_manga_big_page('http://www.pixiv.net' + self.__html_decode(link), url, directory + '/' + pixiv_id)
 
-	def __enter_manga_big_page(self, url, pixiv_id):
+	def __enter_manga_big_page(self, url, referer, directory):
 		print('********************Entering manga-big page***************************')
 		print('Entering ' + url)
 
 		try:
-			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id})
+			page_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id}, headers={'Referer':referer})
 		except Exception:
 			print('Connection failure. Retrying...')
-			self.__enter_manga_big_page(url, pixiv_id)
+			self.__enter_manga_big_page(url, referer, directory)
 			return
 		
 		re_image_result = re.findall(r'<img src="(.*?)"', page_result.text)
-		url_parsed_array = re_image_result[0].split('/')
-		file_name = url_parsed_array[len(url_parsed_array)-1]
 		print('Downloading manga-big image...')
-
-		try:
-			download_result = self.__session.get(self.__html_decode(re_image_result[0]), cookies={'PHPSESSID': self.__session_id}, headers={'Referer':url})
-		except Exception:
-			print('Connection failure. Retrying...')
-			self.__enter_manga_big_page(url, pixiv_id)
-			return
-
-		if (download_result.status_code != 200):
-			print('Download Error')
-			print(download_result.text)
-		with open('images/' + pixiv_id + '/' + file_name, 'wb+') as f:
-			for chunk in download_result.iter_content():
-				f.write(chunk)
-			f.close()
+		self.__download_image(self.__html_decode(re_image_result[0]), url, directory)
 		print('Download completed.')
 
 	def __increment_author_ratings(self, author_id, increment, pixiv_id):
@@ -194,3 +206,22 @@ class PixivHackLib(object):
 	def __html_decode(self, string):
 		h = HTMLParser.HTMLParser()
 		return h.unescape(string)
+
+	def __download_image(self, url, referer, directory):
+		try:
+			download_result = self.__session.get(url, cookies={'PHPSESSID': self.__session_id}, headers={'Referer':referer})
+		except Exception:
+			print('Connection failure. Retrying...')
+			self.__download_image(url, referer, directory)
+			return
+
+		if (download_result.status_code != 200):
+			print('Download Error')
+			print(download_result.text)
+			return
+		url_parsed_array = url.split('/')
+		file_name = url_parsed_array[len(url_parsed_array)-1]
+		with open(directory + '/' + file_name, 'wb+') as f:
+			for chunk in download_result.iter_content():
+				f.write(chunk)
+			f.close()
