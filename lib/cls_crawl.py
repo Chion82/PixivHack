@@ -24,6 +24,7 @@ class PixivHackLib(object):
 		self.__max_pics = 10
 		self.__pic_downloaded_count = 0
 		self.__download_manga = True
+		self.__download_big_images = True
 		self.__author_ratings = []
 
 	@property
@@ -34,11 +35,12 @@ class PixivHackLib(object):
 	def session_id(self, id_str):
 		self.__session_id = id_str
 
-	def config(self, keyword, min_ratings, max_pics, download_manga):
+	def config(self, keyword, min_ratings, max_pics, download_manga, download_big_images):
 		self.__keyword = keyword
 		self.__min_ratings = min_ratings
 		self.__max_pics = max_pics
 		self.__download_manga = download_manga
+		self.__download_big_images = download_big_images
 
 	def crawl(self):
 		self.__pic_downloaded_count = 0
@@ -133,6 +135,9 @@ class PixivHackLib(object):
 			self.__download_image(self.__html_decode(re_image_result[0]), url, directory)
 			print('Download completed.')
 		elif (len(re_big_image_result) > 0):
+			if (self.__download_big_images == False):
+				print('Illustration is big-image. Skipping...')
+				return
 			print('Illustration mode is big-image. Entering big-image page.')
 			self.__enter_big_image_page('http://www.pixiv.net/' + self.__html_decode(re_big_image_result[0]), url, directory)
 			self.__pic_downloaded_count = self.__pic_downloaded_count + 1

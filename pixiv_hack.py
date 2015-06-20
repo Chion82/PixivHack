@@ -23,6 +23,14 @@ if __name__ == '__main__':
 	else:
 		print('Will not download manga.')
 		download_manga = False
+	print('Download big-images? (Y/n)')
+	download_big_images_str = raw_input()
+	if (download_big_images_str == 'Y' or download_big_images_str == 'y'):
+		print('Will download big-images.')
+		download_big_images = True
+	else:
+		print('Will not download big-images.')
+		download_big_images = False
 	lib = PixivHackLib()
 	lib.session_id = PHPSESSID
 	
@@ -35,7 +43,7 @@ if __name__ == '__main__':
 		author_list = [str(x['author_id']) if type(x)==dict else str(x) for x in author_list]
 		print('Enter maximum number of illustrations per author:')
 		max_pics_per_author = raw_input()
-		lib.config('', int(min_ratings), 0, download_manga)
+		lib.config('', int(min_ratings), 0, download_manga, download_big_images)
 		lib.crawl_by_author(author_list, int(max_pics_per_author))
 	else:
 		print('Will crawl using keyword.')
@@ -43,5 +51,5 @@ if __name__ == '__main__':
 		key_word = raw_input()
 		print('Enter maximum number of illustrations to download:')
 		max_pics = raw_input()
-		lib.config(key_word, int(min_ratings), int(max_pics), download_manga)
+		lib.config(key_word, int(min_ratings), int(max_pics), download_manga, download_big_images)
 		lib.crawl()

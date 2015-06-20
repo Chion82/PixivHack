@@ -1,1 +1,4 @@
 *.pyc
+/*.json
+/images/*
+!/images/.gitkeep
