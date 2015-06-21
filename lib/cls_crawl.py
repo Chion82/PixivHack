@@ -47,16 +47,19 @@ class PixivHackLib(object):
 		self.__author_ratings = []
 		page = 1
 		while self.__pic_downloaded_count < self.__max_pics :
-			search_result = self.__get_search_result(page, None)
-			if (len(search_result)==0 or page>1000):
-				print('No more result found. ')
-				break
-			for link in search_result:
-				if (self.__pic_downloaded_count >= self.__max_pics):
+			try:
+				search_result = self.__get_search_result(page, None)
+				if (len(search_result)==0 or page>1000):
+					print('No more result found. ')
 					break
-				self.__enter_illustration_page(link, 'images')
-			page = page + 1
-			print('************************Moving to next page************************')
+				for link in search_result:
+					if (self.__pic_downloaded_count >= self.__max_pics):
+						break
+					self.__enter_illustration_page(link, 'images')
+				page = page + 1
+				print('************************Moving to next page************************')
+			except Exception:
+				continue
 		print('All Done! Saving author info...')
 		self.__save_author_ratings()
 
@@ -69,16 +72,19 @@ class PixivHackLib(object):
 			if not os.path.exists('images/' + author_id):
 				os.makedirs('images/' + author_id)
 			while self.__pic_downloaded_count < max_pics_per_author:
-				search_result = self.__get_search_result(page, author_id)
-				if (len(search_result) == 0):
-					print('No more result found.')
-					break
-				for link in search_result:
-					if (self.__pic_downloaded_count >= max_pics_per_author):
+				try:
+					search_result = self.__get_search_result(page, author_id)
+					if (len(search_result) == 0):
+						print('No more result found.')
 						break
-					self.__enter_illustration_page(link, 'images/' + author_id)
-				page = page + 1
-				print('************************Moving to next page***************************')
+					for link in search_result:
+						if (self.__pic_downloaded_count >= max_pics_per_author):
+							break
+						self.__enter_illustration_page(link, 'images/' + author_id)
+					page = page + 1
+					print('************************Moving to next page***************************')
+				except Exception:
+					continue
 			print('***********************Moving to next author**************************')
 		print('All Done!')
 
