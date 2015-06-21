@@ -90,9 +90,8 @@ class PixivHackLib(object):
 				search_result = self.__session.get('http://www.pixiv.net/member_illust.php?id=' + author_id + '&type=all&p=' + str(page), cookies={'PHPSESSID': self.__session_id})
 		except Exception:
 			print('Connection failure. Retrying...')
-			self.__get_search_result(page, author_id)
-			return
-		
+			return self.__get_search_result(page, author_id)
+			
 		result_list = re.findall(r'<a href="(/member_illust\.php\?mode=.*?&amp;illust_id=.*?)">', search_result.text)
 		return ['http://www.pixiv.net'+self.__html_decode(link) for link in result_list if (not '"' in link)]
 
