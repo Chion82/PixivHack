@@ -129,7 +129,7 @@ class PixivHackLib(object):
 			return
 		self.__increment_author_ratings(pixiv_author_id, int(ratings), pixiv_id)
 		re_manga_result = re.findall(r'<a href="(member_illust\.php\?mode=manga&amp;illust_id=.*?)"', page_result.text)
-		re_image_result = re.findall(r'data-src="(.*?/img-original/.*?)"', page_result.text)
+		re_image_result = re.findall(r'data-src="(.*?)" class="original-image"', page_result.text)
 		re_big_image_result = re.findall(r'<a href="(member_illust\.php\?mode=big&amp;illust_id=.*?)"', page_result.text)
 		if (len(re_manga_result) > 0):
 			if (self.__download_manga == False):
