@@ -59,6 +59,8 @@ class PixivHackLib(object):
 				page = page + 1
 				print('************************Moving to next page************************')
 			except Exception:
+				print('Crawl error. Skipping page...')
+				page = page + 1
 				continue
 		print('All Done! Saving author info...')
 		self.__save_author_ratings()
@@ -84,6 +86,8 @@ class PixivHackLib(object):
 					page = page + 1
 					print('************************Moving to next page***************************')
 				except Exception:
+					print('Crawl error. Skipping page...')
+					page = page + 1
 					continue
 			print('***********************Moving to next author**************************')
 		print('All Done!')
