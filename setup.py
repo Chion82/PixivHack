@@ -2,7 +2,7 @@ from setuptools import setup
 setup(
   name = 'pixivhack',
   packages = ['pixivhack'],
-  version = '0.1',
+  version = '0.1.1',
   description = 'Pixiv Hack is a tool to automatically crawl illustrations filtered by ratings on www.pixiv.net',
   author = 'Chion82',
   license='MIT',
@@ -18,7 +18,7 @@ setup(
   install_requires=['requests'],
   entry_points={
       'console_scripts': [
-          'paxivhack=pixivhack.pixivhack:main',
+          'paxivhack=pixivhack:main',
       ],
   },
 )
