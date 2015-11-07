@@ -1,7 +1,16 @@
 #Pixiv Hack
 
+![version](https://img.shields.io/badge/PixivHack-tested-brightgreen.svg)
+![license](https://img.shields.io/badge/license-MIT-brightgreen.svg)
+![version](https://img.shields.io/badge/pypi-v0.1.5-orange.svg)
+![python](https://img.shields.io/badge/python-2.7-green.svg)
+
 ##Introduction  
 Pixiv Hack is a tool to automatically crawl illustrations filtered by ratings on www.pixiv.net .
+
+##Installation
+
+```pip install pixivhack```
 
 ##Usage  
 1. Browse www.pixiv.net and sign in with your account. Copy the value of cookies:PHPSESSID using the browser debugger (F12)  
