@@ -1,10 +1,10 @@
 #Pixiv Hack
 
-![version](https://img.shields.io/badge/PixivHack-tested-brightgreen.svg)
-![license](https://img.shields.io/badge/license-MIT-brightgreen.svg)
 [![PyPI version](https://badge.fury.io/py/pixivhack.svg)](https://badge.fury.io/py/pixivhack)
-![python](https://img.shields.io/badge/python-2.7-green.svg)
 [![Code Health](https://landscape.io/github/Chion82/PixivHack/master/landscape.svg?style=flat)](https://landscape.io/github/Chion82/PixivHack/master)
+![python](https://img.shields.io/badge/python-2.7-green.svg)
+![license](https://img.shields.io/badge/license-MIT-brightgreen.svg)
+
 
 ##Introduction  
 Pixiv Hack is a tool to automatically crawl illustrations filtered by ratings on www.pixiv.net .
