@@ -2,7 +2,7 @@
 
 #Author: Chion82<sdspeedonion@gmail.com>
 
-from pixivhacklib.cls_crawl import PixivHackLib
+from cls_crawl import PixivHackLib
 import argparse
 import json
 
