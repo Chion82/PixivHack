@@ -26,6 +26,8 @@ class PixivHackLib(object):
 		self.__download_manga = True
 		self.__download_big_images = True
 		self.__author_ratings = []
+		if not os.path.exists('pixivimages'):
+			os.makedirs('pixivimages')
 
 	@property
 	def session_id(self):
@@ -55,7 +57,7 @@ class PixivHackLib(object):
 				for link in search_result:
 					if (self.__pic_downloaded_count >= self.__max_pics):
 						break
-					self.__enter_illustration_page(link, 'images')
+					self.__enter_illustration_page(link, 'pixivimages')
 				page = page + 1
 				print('************************Moving to next page************************')
 			except Exception:
@@ -71,8 +73,8 @@ class PixivHackLib(object):
 			print('author Pixiv ID : ' + author_id)
 			self.__pic_downloaded_count = 0
 			page = 1
-			if not os.path.exists('images/' + author_id):
-				os.makedirs('images/' + author_id)
+			if not os.path.exists('pixivimages/' + author_id):
+				os.makedirs('pixivimages/' + author_id)
 			while self.__pic_downloaded_count < max_pics_per_author:
 				try:
 					search_result = self.__get_search_result(page, author_id)
@@ -82,7 +84,7 @@ class PixivHackLib(object):
 					for link in search_result:
 						if (self.__pic_downloaded_count >= max_pics_per_author):
 							break
-						self.__enter_illustration_page(link, 'images/' + author_id)
+						self.__enter_illustration_page(link, 'pixivimages/' + author_id)
 					page = page + 1
 					print('************************Moving to next page***************************')
 				except Exception:

@@ -15,7 +15,7 @@ if __name__ == '__main__':
 	PHPSESSID = raw_input()
 	print('Enter minimum ratings:')
 	min_ratings = raw_input()
-	print('Download manga? (Y/n)')
+	print('Download manga? (y/N)')
 	download_manga_str = raw_input()
 	if (download_manga_str == 'Y' or download_manga_str == 'y'):
 		print('Will download manga.')
@@ -23,7 +23,7 @@ if __name__ == '__main__':
 	else:
 		print('Will not download manga.')
 		download_manga = False
-	print('Download big-images? (Y/n)')
+	print('Download big-images? (y/N)')
 	download_big_images_str = raw_input()
 	if (download_big_images_str == 'Y' or download_big_images_str == 'y'):
 		print('Will download big-images.')
